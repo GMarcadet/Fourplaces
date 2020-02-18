@@ -1,5 +1,6 @@
 ﻿using Common.Api.Dtos;
 using Fourplaces.DTO;
+using Fourplaces.Resources;
 using Plugin.Media;
 using Plugin.Media.Abstractions;
 using Plugin.Permissions;
@@ -24,12 +25,6 @@ namespace Fourplaces.ViewModels
 {
     class CreatePlaceViewModel : ViewModelBase
     {
-
-        private enum PictureSelectionMode
-        {
-            PICK_FROM_GALLERY,
-            PICK_FROM_CAMERA,
-        }
 
         private string _title;
         private string _description;
@@ -77,123 +72,36 @@ namespace Fourplaces.ViewModels
 
         public async void OnPickPhoto()
         {
-            // ask at user to choose between pick an image from gallery and take a picture
-            PictureSelectionMode selectionMode = await AskToPickSelectionMode();
-            if ( selectionMode == PictureSelectionMode.PICK_FROM_CAMERA )
-            {
-                _imageItem = await PickImageFromCamera();
-            } else
-            {
-                _imageItem = await PickImageFromGallery();
-            }
-            Console.WriteLine("Received image id: " + _imageItem.Id);
-
-        }
-
-        private async Task<ImageItem> PickImageFromCamera()
-        {
-            Console.WriteLine("Ask to camera");
-
-
             bool permissionGranted = await AskPermissions();
-            if ( !permissionGranted )
+            if (permissionGranted)
             {
+                // ask at user to choose between pick an image from gallery and take a picture
+                PictureSelectionMode selectionMode = await AskToPickSelectionMode();
+                MediaFile file = await ImageManagerService.PickImage(selectionMode);
+                if ( file != null )
+                {
+                    ApiClient client = new ApiClient();
+                    _imageItem = await client.PublishMediaFile(file);
+                    Console.WriteLine("Received image id: " + _imageItem.Id);
+                } else
+                {
+                    Console.WriteLine("Returned file is null");
+                }
+            } else {
                 await DisplayAlert("Missing Permissions", "Some permissions are missing");
-                return new ImageItem();
-            }
-            
-
-            await CrossMedia.Current.Initialize();
-
-            if (!CrossMedia.Current.IsCameraAvailable || !CrossMedia.Current.IsTakePhotoSupported)
-            {
-                await DisplayAlert("Error", "No media available");
-                return new ImageItem();
             }
 
-            MediaFile file = await CrossMedia.Current.TakePhotoAsync(new Plugin.Media.Abstractions.StoreCameraMediaOptions
-            {
-                Directory = "Sample",
-                Name = "test.jpg",
-                PhotoSize = PhotoSize.Small,
-            });
-
-            if (file == null)
-            {
-                Console.WriteLine("Publishing image failure: File is null");
-                return new ImageItem();
-            }
-                
-
-            return await PublishMediaFile(file);
-            
         }
 
         private async Task<bool> AskPermissions()
         {
-            PermissionStatus cameraStatus = await CrossPermissions.Current.CheckPermissionStatusAsync(Permission.Camera);
-            PermissionStatus storageStatus = await CrossPermissions.Current.CheckPermissionStatusAsync(Permission.Storage);
-
-            if (cameraStatus != PermissionStatus.Granted || storageStatus != PermissionStatus.Granted)
-            {
-                Dictionary<Permission, PermissionStatus> permissionsStatus = await CrossPermissions.Current.RequestPermissionsAsync(new Permission[] { Permission.Camera, Permission.Storage });
-                cameraStatus = permissionsStatus[Permission.Camera];
-                storageStatus = permissionsStatus[Permission.Storage];
-            }
-
-            var status = await CrossPermissions.Current.CheckPermissionStatusAsync(Permission.Camera);
-            if (status != PermissionStatus.Granted)
-            {
-                if (await CrossPermissions.Current.ShouldShowRequestPermissionRationaleAsync(Permission.Camera))
-                {
-                    await DisplayAlert("Camera Permission", "Allow SavR to access your camera");
-                }
-
-                var results = await CrossPermissions.Current.RequestPermissionsAsync(new[] { Permission.Camera });
-                status = results[Permission.Camera];
-            }
-
-            return cameraStatus == PermissionStatus.Granted && storageStatus == PermissionStatus.Granted;
-
+            return await PermissionManager.AskPermissions(new Permission[] { Permission.Camera, Permission.Storage });
         }
 
         private async Task DisplayAlert( string title, string message )
         {
             IDialogService dialog = DependencyService.Get<IDialogService>();
             await dialog.DisplayAlertAsync( title, message, "Close" );
-        }
-
-        private async Task<ImageItem> PickImageFromGallery() {
-            Console.WriteLine("Ask to gallery");
-            bool permissionGranted = await AskPermissions();
-            if (!permissionGranted)
-            {
-                await DisplayAlert("Missing Permissions", "Some permissions are missing");
-                return new ImageItem();
-            }
-
-
-            await CrossMedia.Current.Initialize();
-
-            if (!CrossMedia.Current.IsCameraAvailable || !CrossMedia.Current.IsTakePhotoSupported)
-            {
-                await DisplayAlert("Error", "No media available");
-                return new ImageItem();
-            }
-
-            MediaFile file = await CrossMedia.Current.PickPhotoAsync(new PickMediaOptions()
-            {
-                PhotoSize = PhotoSize.Small,
-            });
-
-            if (file == null)
-            {
-                Console.WriteLine("Publishing image failure: File is null");
-                return new ImageItem();
-            }
-
-
-            return await PublishMediaFile(file);
         }
 
         private async Task<PictureSelectionMode> AskToPickSelectionMode()
@@ -208,7 +116,6 @@ namespace Fourplaces.ViewModels
             {
                 return PictureSelectionMode.PICK_FROM_GALLERY;
             }
-
         }
 
         public async void OnFillCoordinates()
@@ -274,60 +181,6 @@ namespace Fourplaces.ViewModels
             await CrossMedia.Current.Initialize();
 
             await FillCoordinates();
-        }
-
-        private byte[] toByteArray(MediaFile file)
-        {
-            using (var memoryStream = new MemoryStream())
-            {
-                file.GetStream().CopyTo(memoryStream);
-                file.Dispose();
-                return memoryStream.ToArray();
-            }
-        }
-
-        private async Task<ImageItem> PublishMediaFile(MediaFile file)
-        {
-            Console.WriteLine("Publishing image...");
-            // prepare access token
-            HttpClient client = new HttpClient();
-            byte[] imageData = toByteArray(file);
-
-            SessionStorage storage = SessionStorage.GetStorage();
-            string accessToken = storage.Get(ApiClient.ACCESS_TOKEN) as string;
-
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, APIResources.buildImagePublicationURI());
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-
-            MultipartFormDataContent requestContent = new MultipartFormDataContent();
-
-            var imageContent = new ByteArrayContent(imageData);
-            imageContent.Headers.ContentType = MediaTypeHeaderValue.Parse("image/jpeg");
-
-            // Le deuxième paramètre doit absolument être "file" ici sinon ça ne fonctionnera pas
-            requestContent.Add(imageContent, "file", "file.jpg");
-
-            request.Content = requestContent;
-
-            HttpResponseMessage response = await client.SendAsync(request);
-
-            string result = await response.Content.ReadAsStringAsync();
-
-            if (response.IsSuccessStatusCode)
-            {
-                ApiClient apiClient = new ApiClient();
-                Response<ImageItem> imageResponse = await apiClient.ReadFromResponse<Response<ImageItem>>(response);
-                ImageItem item = imageResponse.Data;
-
-                Console.WriteLine("Image Uploded !");
-                
-                return item;
-            } else
-            {
-
-                Console.WriteLine("Publishing image failure: Invalid status code: " + response.StatusCode);
-            }
-            return new ImageItem();
         }
 
         private async Task FillCoordinates()

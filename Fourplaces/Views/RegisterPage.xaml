@@ -5,17 +5,40 @@
              xmlns:d="http://xamarin.com/schemas/2014/forms/design"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d"
+            xmlns:converters="clr-namespace:Fourplaces.Converters"
              x:Class="Fourplaces.Views.RegisterPage">
+    
+    <ContentPage.Resources>
+        <converters:ImagePlaceConverter x:Key="ImagePlaceConverter"/>
+        <Color x:Key="ApplicationColor">#000000</Color>
+        <Color x:Key="ButtonBackgroundColor">#000000</Color>
+        <Color x:Key="ButtonTextColor">#FFFFFF</Color>
+        <Color x:Key="ListTitleColor">#000000</Color>
+        <Color x:Key="ListDetailColor">Gray</Color>
+    </ContentPage.Resources>
+    
     <ContentPage.Content>
-        <StackLayout Margin="10">
-            <FlexLayout Direction="Column" JustifyContent="SpaceEvenly" VerticalOptions="Center" AlignContent="Center" >
-                <Entry Text="{Binding FirstName, Mode=TwoWay}" Placeholder="First name"></Entry>
-                <Entry Text="{Binding LastName, Mode=TwoWay}" Placeholder="Last name"></Entry>
-                <Entry Text="{Binding Email, Mode=TwoWay}" Placeholder="Email"></Entry>
-                <Entry Text="{Binding Password, Mode=TwoWay}" Placeholder="Password" IsPassword="True"></Entry>
-            </FlexLayout>
-            
-            <Button Text="Register" Command="{Binding SubmitRegisterCommand}" VerticalOptions="EndAndExpand"></Button>
+        <StackLayout>
+            <Frame Margin="15">
+                <StackLayout Padding="10">
+                    <Label Text="Profil" FontSize="Title" TextColor="Black" VerticalTextAlignment="Center"/>
+                    <BoxView BackgroundColor="Black" HeightRequest="2"></BoxView>
+                    <Entry Text="{Binding FirstName, Mode=TwoWay}" Placeholder="First name"></Entry>
+                    <Entry Text="{Binding LastName, Mode=TwoWay}" Placeholder="Last name"></Entry>
+                    <Entry Text="{Binding Email, Mode=TwoWay}" Placeholder="Email"></Entry>
+                    <Entry Text="{Binding Password, Mode=TwoWay}" Placeholder="Password" IsPassword="True"></Entry>
+                </StackLayout>
+            </Frame>
+
+
+            <Button 
+                Text="Register" 
+                Command="{Binding SubmitRegisterCommand}" 
+                CornerRadius="5" 
+                TextColor="{StaticResource ButtonTextColor}"
+                BackgroundColor="{StaticResource ButtonBackgroundColor}"
+                Margin="15"
+                VerticalOptions="EndAndExpand"/>
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>

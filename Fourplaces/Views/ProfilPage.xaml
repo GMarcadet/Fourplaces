@@ -32,8 +32,8 @@
                            Padding="0"
                            IsClippedToBounds="True">
                                 <Image Source="{Binding ImageId, Converter={StaticResource ImagePlaceConverter}}" 
-                           HorizontalOptions="Center"
-                           VerticalOptions="Center" />
+                                    HorizontalOptions="Center"
+                                    VerticalOptions="Center" />
                             </Frame>
                         </StackLayout>
                         
@@ -54,7 +54,7 @@
                         <Entry Text="{Binding FirstName}"/>
                         <Entry Text="{Binding LastName}"/>
                         <Entry Text="{Binding Email}"></Entry>
-                        <Button Text="Changer Image" CornerRadius="5" TextColor="{StaticResource ButtonTextColor}" BackgroundColor="{StaticResource ButtonBackgroundColor}"/>
+                        <Button Text="Changer Image" CornerRadius="5" TextColor="{StaticResource ButtonTextColor}" BackgroundColor="{StaticResource ButtonBackgroundColor}" Command="{Binding ChangePictureCommand}"/>
 
                         <Button Text="Update profil" CornerRadius="5" TextColor="{StaticResource ButtonTextColor}" BackgroundColor="{StaticResource ButtonBackgroundColor}" Command="{Binding SubmitProfilUpdate}"/>
                     </StackLayout>

@@ -1,7 +1,9 @@
 ﻿using Common.Api.Dtos;
 using Fourplaces.DTO;
 using Fourplaces.Resources;
+using Plugin.Media.Abstractions;
 using Storm.Mvvm;
+using Storm.Mvvm.Services;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
@@ -69,11 +71,48 @@ namespace Fourplaces.ViewModels
 
         public ICommand SubmitProfilUpdate { protected set; get; }
         public ICommand SubmitChangePassword { protected set; get; }
+        public ICommand ChangePictureCommand { protected set; get; }
 
         public ProfilViewModel()
         {
             this.SubmitProfilUpdate = new Command(OnSubmitProfil);
             this.SubmitChangePassword = new Command(OnChangePassword);
+            this.ChangePictureCommand = new Command(OnPictureChange);
+        }
+
+        private async void OnPictureChange()
+        {
+            PictureSelectionMode selectionMode = await AskToPickSelectionMode();
+            MediaFile picture = await ImageManagerService.PickImage(selectionMode);
+            if ( picture != null )
+            {
+                ApiClient client = new ApiClient();
+                ImageItem imageItem = await client.PublishMediaFile(picture);
+                this.ImageId = imageItem.Id;
+                this.OnSubmitProfil();
+            }
+
+        }
+
+        private async Task DisplayAlert(string title, string message)
+        {
+            IDialogService dialog = DependencyService.Get<IDialogService>();
+            await dialog.DisplayAlertAsync(title, message, "Close");
+        }
+
+        private async Task<PictureSelectionMode> AskToPickSelectionMode()
+        {
+            IDialogService dialog = DependencyService.Get<IDialogService>();
+            bool selection = await dialog.DisplayAlertAsync("Source", "Which source do you want for the picture ?", "Camera", "Gallery");
+            // if true, bind to camera, else Gallery
+            if (selection)
+            {
+                return PictureSelectionMode.PICK_FROM_CAMERA;
+            }
+            else
+            {
+                return PictureSelectionMode.PICK_FROM_GALLERY;
+            }
         }
 
         public async void OnSubmitProfil()

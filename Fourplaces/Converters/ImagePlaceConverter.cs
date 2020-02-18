@@ -12,7 +12,14 @@ namespace Fourplaces.Converters
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             int idImagePlace = (int)value;
-            return APIResources.buildImageURI(idImagePlace);
+            if ( ApiClient.NONE_IMAGE != idImagePlace )
+            {
+                return APIResources.buildImageURI(idImagePlace);
+            } else
+            {
+                return "";
+            }
+           
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

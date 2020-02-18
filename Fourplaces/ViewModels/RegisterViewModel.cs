@@ -1,7 +1,10 @@
 ﻿using Common.Api.Dtos;
 using Fourplaces.DTO;
+using Fourplaces.Resources;
 using Fourplaces.Views;
+using Plugin.Media.Abstractions;
 using Storm.Mvvm;
+using Storm.Mvvm.Services;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
@@ -54,6 +57,14 @@ namespace Fourplaces.ViewModels
 
         public async void OnSubmitRegister()
         {
+            // checks all fields for avoid missing one
+            if ( Email == "" || Password == "" || FirstName == "" || LastName == "" )
+            {
+                await DisplayAlert("Missing Fields", "Please complete your profil before to register.");
+                return;
+            }
+           
+
             // prepare request
             RegisterRequest request = new RegisterRequest() { Email = Email, Password = Password, FirstName = FirstName, LastName = LastName };
             ApiClient client = new ApiClient();
@@ -68,10 +79,10 @@ namespace Fourplaces.ViewModels
                     LoginResult loginResult = loginResponse.Data;
 
                     // move to next page
-                    Dictionary<string, object> navigationParameter = new Dictionary<string, object>();
-                    navigationParameter.Add(ApiClient.ACCESS_TOKEN, loginResult.AccessToken);
-                    navigationParameter.Add(ApiClient.REFRESH_TOKEN, loginResult.RefreshToken);
-                    await NavigationService.PushAsync(new PlacesListPage(), navigationParameter);
+                    SessionStorage storage = SessionStorage.GetStorage();
+                    storage.Add(ApiClient.ACCESS_TOKEN, loginResult.AccessToken);
+                    storage.Add(ApiClient.REFRESH_TOKEN, loginResult.RefreshToken);
+                    await NavigationService.PushAsync(new PlacesListPage());
                 } else
                 {
                     Console.WriteLine("Login response failure: ");
@@ -82,11 +93,33 @@ namespace Fourplaces.ViewModels
                 Console.WriteLine("Invalid response status code: " + httpResponse.StatusCode);
             }
         }
-        
+
+        private async Task<PictureSelectionMode> AskToPickSelectionMode()
+        {
+            IDialogService dialog = DependencyService.Get<IDialogService>();
+            bool selection = await dialog.DisplayAlertAsync("Source", "Which source do you want for the picture ?", "Camera", "Gallery");
+            // if true, bind to camera, else Gallery
+            if (selection)
+            {
+                return PictureSelectionMode.PICK_FROM_CAMERA;
+            }
+            else
+            {
+                return PictureSelectionMode.PICK_FROM_GALLERY;
+            }
+        }
+
         public bool OnBackButtonPressed()
         {
             return true;
         }
+
+        private async Task DisplayAlert(string title, string message)
+        {
+            IDialogService dialog = DependencyService.Get<IDialogService>();
+            await dialog.DisplayAlertAsync(title, message, "Close");
+        }
+
 
     }
 }
