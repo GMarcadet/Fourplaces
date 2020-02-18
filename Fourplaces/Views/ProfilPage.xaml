@@ -1,0 +1,76 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<mvvm:BaseContentPage
+    xmlns:mvvm="clr-namespace:Storm.Mvvm.Forms;assembly=Storm.Mvvm.Forms" xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+              xmlns:local="clr-namespace:Fourplaces.Converters"
+             mc:Ignorable="d"
+             x:Class="Fourplaces.Views.ProfilPage">
+
+    <mvvm:BaseContentPage.Resources>
+        <local:ImagePlaceConverter x:Key="ImagePlaceConverter"/>
+        <local:UserToStringConverter x:Key="UserToStringConverter"/>
+        <Color x:Key="ApplicationColor">#000000</Color>
+        <Color x:Key="ButtonBackgroundColor">#000000</Color>
+        <Color x:Key="ButtonTextColor">#FFFFFF</Color>
+        <Color x:Key="ListTitleColor">#000000</Color>
+        <Color x:Key="ListDetailColor">Gray</Color>
+    </mvvm:BaseContentPage.Resources>
+
+    <ContentPage.Content>
+        <ScrollView>
+            <StackLayout>
+                <Frame Margin="15">
+                    <FlexLayout Direction="Row">
+                        <!-- User image-->
+                        <StackLayout>
+                            <Frame CornerRadius="100"
+                           HeightRequest="75"
+                           WidthRequest="75" 
+                               VerticalOptions="Center"
+                           Padding="0"
+                           IsClippedToBounds="True">
+                                <Image Source="{Binding ImageId, Converter={StaticResource ImagePlaceConverter}}" 
+                           HorizontalOptions="Center"
+                           VerticalOptions="Center" />
+                            </Frame>
+                        </StackLayout>
+                        
+                        
+                        <!-- User name-->
+                        <StackLayout FlexLayout.Grow="1" Orientation="Horizontal" Padding="10">
+                            <Label Text="{Binding FirstName, Mode=TwoWay}" TextColor="Black" FontSize="Title" VerticalTextAlignment="Center"/>
+                            <Label Text="{Binding LastName, Mode=TwoWay}" TextColor="Black" FontSize="Title" VerticalTextAlignment="Center"/>
+                        </StackLayout>
+
+                    </FlexLayout>
+                </Frame>
+
+                <Frame Margin="15, 0, 15, 15">
+                    <StackLayout Padding="10">
+                        <Label Text="Profil" FontSize="Title" TextColor="Black" VerticalTextAlignment="Center"/>
+                        <BoxView BackgroundColor="Black" HeightRequest="2"></BoxView>
+                        <Entry Text="{Binding FirstName}"/>
+                        <Entry Text="{Binding LastName}"/>
+                        <Entry Text="{Binding Email}"></Entry>
+                        <Button Text="Changer Image" CornerRadius="5" TextColor="{StaticResource ButtonTextColor}" BackgroundColor="{StaticResource ButtonBackgroundColor}"/>
+
+                        <Button Text="Update profil" CornerRadius="5" TextColor="{StaticResource ButtonTextColor}" BackgroundColor="{StaticResource ButtonBackgroundColor}" Command="{Binding SubmitProfilUpdate}"/>
+                    </StackLayout>
+                </Frame>
+
+                <Frame Margin="15, 0, 15, 15">
+                    <StackLayout>
+                        <Label Text="Password" FontSize="Title" TextColor="Black" VerticalTextAlignment="Center"/>
+                        <BoxView BackgroundColor="Black" HeightRequest="2"></BoxView>
+                        <Entry Text="{Binding OldPassword}" Placeholder="Old Password"></Entry>
+                        <Entry Text="{Binding NewPassword}" Placeholder="New Password"></Entry>
+                        <Button Text="Change Password" CornerRadius="5" TextColor="{StaticResource ButtonTextColor}" BackgroundColor="{StaticResource ButtonBackgroundColor}" Command="{Binding SubmitChangePassword}"></Button>
+                    </StackLayout>
+                </Frame>
+                
+            </StackLayout>
+        </ScrollView>
+    </ContentPage.Content>
+</mvvm:BaseContentPage>

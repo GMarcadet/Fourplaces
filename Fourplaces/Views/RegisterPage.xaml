@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    xmlns:mvvm="clr-namespace:Storm.Mvvm.Forms;assembly=Storm.Mvvm.Forms" xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             x:Class="Fourplaces.Views.RegisterPage">
+    <ContentPage.Content>
+        <StackLayout Margin="10">
+            <FlexLayout Direction="Column" JustifyContent="SpaceEvenly" VerticalOptions="Center" AlignContent="Center" >
+                <Entry Text="{Binding FirstName, Mode=TwoWay}" Placeholder="First name"></Entry>
+                <Entry Text="{Binding LastName, Mode=TwoWay}" Placeholder="Last name"></Entry>
+                <Entry Text="{Binding Email, Mode=TwoWay}" Placeholder="Email"></Entry>
+                <Entry Text="{Binding Password, Mode=TwoWay}" Placeholder="Password" IsPassword="True"></Entry>
+            </FlexLayout>
+            
+            <Button Text="Register" Command="{Binding SubmitRegisterCommand}" VerticalOptions="EndAndExpand"></Button>
+        </StackLayout>
+    </ContentPage.Content>
+</ContentPage>

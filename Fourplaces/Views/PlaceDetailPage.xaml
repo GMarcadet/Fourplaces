@@ -1,0 +1,62 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<mvvm:BaseContentPage
+    xmlns:mvvm="clr-namespace:Storm.Mvvm.Forms;assembly=Storm.Mvvm.Forms"
+    xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:local="clr-namespace:Fourplaces.Converters"
+    xmlns:resources="clr-namespace:Fourplaces.Resources"
+    mc:Ignorable="d"
+             x:Class="Fourplaces.Views.PlaceDetailPage">
+
+    <mvvm:BaseContentPage.Resources>
+        <local:ImagePlaceConverter x:Key="ImagePlaceConverter"/>
+        <local:UserToStringConverter x:Key="UserToStringConverter"/>
+        <Color x:Key="titleColor">#C756FF</Color>
+    </mvvm:BaseContentPage.Resources>
+    
+    
+    
+    
+    
+    <ContentPage.Content>
+        <StackLayout>
+            <Image Source="{Binding ImageId, Converter={StaticResource ImagePlaceConverter}}" MinimumWidthRequest="50" HorizontalOptions="CenterAndExpand" HeightRequest="100"/>
+
+            <Frame CornerRadius="10">
+
+                <StackLayout>
+                    <Label Text="{ Binding Title }" FontSize="Title" TextColor="Black" Padding="0, 0, 0, 5"/>
+                    <FlexLayout Direction="Row">
+                        <resources:BindableMap 
+                            MapPins="{Binding PinCollection}" 
+                            MapPosition="{Binding MyPosition}"
+                            HeightRequest="100" 
+                            WidthRequest="200"/>
+                        <Label Text="{Binding Description}" Margin="5" VerticalTextAlignment="Start"/>
+                    </FlexLayout>
+
+
+
+
+
+                    <ListView ItemsSource="{Binding Comments}">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <TextCell Text="{Binding Author, Converter={ StaticResource UserToStringConverter }}" Detail="{Binding Text}" TextColor="Black" />
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+
+                    <FlexLayout Direction="Row">
+                        <Entry FlexLayout.Grow="2" Placeholder="Comment" Text="{Binding UserComment}" />
+                        <Button FlexLayout.Grow="1" Text="Send" Command="{Binding SendCommentCommand}" BackgroundColor="Black" TextColor="White" CornerRadius="5"/>
+                    </FlexLayout>
+                </StackLayout>
+            </Frame>
+
+
+        </StackLayout>
+    </ContentPage.Content>
+</mvvm:BaseContentPage>

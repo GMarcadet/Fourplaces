@@ -1,0 +1,60 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<mvvm:BaseContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:mvvm="clr-namespace:Storm.Mvvm.Forms;assembly=Storm.Mvvm.Forms"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:Ignorable="d"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                      xmlns:local="clr-namespace:Fourplaces.Converters"
+                      x:Class="Fourplaces.Views.PlacesListPage">
+
+    <ContentPage.Resources>
+        <Color x:Key="ApplicationColor">#000000</Color>
+        <Color x:Key="ButtonBackgroundColor">#000000</Color>
+        <Color x:Key="ButtonTextColor">#FFFFFF</Color>
+        <Color x:Key="ListTitleColor">#000000</Color>
+        <Color x:Key="ListDetailColor">Gray</Color>
+    </ContentPage.Resources>
+    
+    <mvvm:BaseContentPage.Resources>
+        <local:ImagePlaceConverter x:Key="ImagePlaceConverter"/>
+    </mvvm:BaseContentPage.Resources>
+    
+    <StackLayout Padding="10">
+        <FlexLayout>
+            <Label FlexLayout.Grow="1" VerticalTextAlignment="Center" FontSize="Title" Text="Liste des lieux" HorizontalOptions="Center"></Label>
+            <Button 
+                Text="Profil" 
+                BackgroundColor="{StaticResource ButtonBackgroundColor}"
+                TextColor="{StaticResource ButtonTextColor}"
+                CornerRadius="5"
+                Command="{Binding GoToProfilCommand}"/>
+        </FlexLayout>
+        
+
+        <ListView ItemsSource="{Binding Places}" SelectedItem="{ Binding SelectedPlace }" RefreshCommand="{ Binding RefreshCommand }" IsPullToRefreshEnabled="True">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <ImageCell 
+                        Text="{Binding Title}" 
+                        Detail="{Binding Description}" 
+                        ImageSource="{Binding ImageId, Converter={StaticResource ImagePlaceConverter}}"
+                        
+                        TextColor="{StaticResource ListTitleColor}"
+                        DetailColor="{StaticResource ListDetailColor}"
+                        />
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+
+        <Button 
+            HorizontalOptions="FillAndExpand" 
+            Text="Add" 
+            TextColor="{StaticResource ButtonTextColor}"
+            BackgroundColor="{StaticResource ButtonBackgroundColor}"
+            CornerRadius="5"
+            Command="{Binding CreatePlaceCommand}"></Button>
+    </StackLayout>
+</mvvm:BaseContentPage>
+    
+    
